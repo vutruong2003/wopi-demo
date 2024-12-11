@@ -1,0 +1,52 @@
+services:
+  
+  libreoffice_app:
+    image: collabora/code
+    container_name: libreoffice_app
+    hostname: libreoffice_app
+    expose:
+      - 9980
+    ports:
+      - "9980:9980"
+    environment:
+      - username=admin
+      - password=adminadmin
+      - extra_params=--o:ssl.enable=false
+    depends_on:
+      - web_app
+    networks:
+      - docx-network
+
+  web_app:
+    container_name: web_app
+    build:
+      context: ./dotNet/WebApplication2/
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    hostname: web_app
+    ports:
+      - 8080:8080
+    restart: on-failure
+    networks:
+      - docx-network
+
+  web_api:
+    container_name: web_api
+    build:
+      context: ./dotNet/WebApplication1/
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    hostname: web_api
+    ports:
+      - 12010:80
+    depends_on:
+      - web_app
+    restart: on-failure
+    networks:
+      - docx-network
+
+networks:
+  docx-network:
+    driver: bridge
